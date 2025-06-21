@@ -1,5 +1,5 @@
 import { useState } from "react";
-
+import "react-datepicker/dist/react-datepicker.css";
 export default function App() {
   const [name, setName] = useState("");
   const [eventName, setEventName] = useState("");
