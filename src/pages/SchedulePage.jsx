@@ -173,8 +173,54 @@ export default function SchedulePage() {
     </div>
   );
 
+  const renderMobile = () => (
+    <div className="max-w-[500px] mx-auto px-4 py-6">
+      <div className="flex justify-between items-center mb-6">
+        <p className="text-[#0d141c] text-[24px] font-bold">Notifications</p>
+      </div>
+      <SearchInput />
+      <div className="flex flex-col gap-4 pb-20">
+        {events.length > 0 ? events.map((ev) => {
+          const date = new Date(ev.event_date).toLocaleDateString("en-GB", {
+            year: "numeric", month: "short", day: "numeric"
+          });
+          const time = new Date(`1970-01-01T${ev.event_time}`).toLocaleTimeString("en-US", {
+            hour: "2-digit", minute: "2-digit", hour12: true
+          });
+          return (
+            <div
+              key={ev.id}
+              className="bg-white rounded-xl border border-gray-200 p-4 shadow cursor-pointer"
+              onClick={() => onEventClick(ev)}
+            >
+              <p className="text-lg font-semibold text-[#0d141c] mb-2">{ev.event_name}</p>
+              <p className="text-sm text-[#49739c] mb-1">📅 {date}</p>
+              <p className="text-sm text-[#49739c] mb-3">⏰ {time}</p>
+              <div className="flex space-x-2">
+                <button
+                  onClick={(e) => { e.stopPropagation(); handleEdit(ev); }}
+                  className="flex-1 bg-gray-400 hover:bg-gray-500 text-white px-3 py-2 rounded-xl text-xs"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); handleDelete(ev.id); }}
+                  className="flex-1 bg-gray-500 hover:bg-gray-600 text-white px-3 py-2 rounded-xl text-xs"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          );
+        }) : (
+          <p className="text-gray-400 italic text-center">No events found.</p>
+        )}
+      </div>
+    </div>
+  );
+
   return (
-    <div className="min-h-screen bg-slate-50 text-gray-800 font-sans">
+    <div className="min-h-screen bg-slate-50 text-gray-800 font-sans relative">
       <ToastContainer position="top-right" autoClose={3000} theme="colored" />
       {loading && (
         <div className="fixed inset-0 bg-white/60 z-50 flex items-center justify-center">
@@ -194,7 +240,20 @@ export default function SchedulePage() {
           editingEventId={editingEventId}
         />
       )}
-      <div>{renderDesktop()}</div>
+
+      {/* Desktop */}
+      <div className="hidden sm:block">{renderDesktop()}</div>
+
+      {/* Mobile */}
+      <div className="block sm:hidden">{renderMobile()}</div>
+
+      {/* Floating "+" button for mobile */}
+      <button
+        onClick={() => setShowForm(true)}
+        className="fixed bottom-5 right-5 sm:hidden bg-black hover:bg-gray-900 text-white w-14 h-14 rounded-full flex items-center justify-center text-3xl shadow-lg"
+      >
+        +
+      </button>
     </div>
   );
 }

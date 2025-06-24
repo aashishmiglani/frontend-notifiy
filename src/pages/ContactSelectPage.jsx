@@ -1,5 +1,3 @@
-// ContactSelectPage.jsx
-
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import axios from "axios";
@@ -160,9 +158,9 @@ export default function ContactSelectPage() {
         }
     };
 
-  return (
-        <div className="min-h-screen bg-slate-50 py-8 px-4 flex justify-center">
-            <div className="bg-white w-full max-w-4xl p-6 rounded-2xl shadow-lg">
+    return (
+        <div className="min-h-screen bg-slate-50 py-6 px-3 sm:px-6 flex justify-center">
+            <div className="bg-white w-full max-w-4xl p-5 sm:p-6 rounded-2xl shadow-lg">
                 <button 
                     onClick={() => navigate("/")} 
                     className="text-teal-600 hover:text-teal-800 mb-4 flex items-center space-x-1 text-base font-medium"
@@ -171,9 +169,9 @@ export default function ContactSelectPage() {
                     <span>Back to Home</span>
                 </button>
 
-                <div className="border border-teal-300 bg-teal-50 rounded-xl p-5 mb-6">
-                    <h2 className="text-2xl font-semibold text-slate-800 mb-1">📅 Event: {state.eventName}</h2>
-                    <p className="text-slate-600">Date: {state.eventDate} | Time: {state.eventTime} | ID: {state.eventId}</p>
+                <div className="border border-teal-300 bg-teal-50 rounded-xl p-4 sm:p-5 mb-5">
+                    <h2 className="text-xl sm:text-2xl font-semibold text-slate-800 mb-1">📅 Event: {state.eventName}</h2>
+                    <p className="text-slate-600 text-sm sm:text-base">Date: {state.eventDate} | Time: {state.eventTime} | ID: {state.eventId}</p>
                 </div>
 
                 <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-5">
@@ -192,47 +190,65 @@ export default function ContactSelectPage() {
                     </button>
                 </div>
 
-                <div className="overflow-x-auto border rounded-lg shadow mb-5">
-                    <table className="min-w-full text-sm text-left text-slate-700">
-                        <thead className="bg-slate-100">
-                            <tr>
-                                <th className="p-3">
-                                    <input 
-                                        type="checkbox" 
-                                        checked={isAllSelected} 
-                                        onChange={toggleSelectAll} 
-                                    />
-                                </th>
-                                <th className="p-3 font-semibold text-slate-700">Name</th>
-                                <th className="p-3 font-semibold text-slate-700">Phone</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {isLoadingContacts ? (
-                                <tr>
-                                    <td colSpan="3" className="p-4 text-center">Loading...</td>
-                                </tr>
-                            ) : contacts.length === 0 ? (
-                                <tr>
-                                    <td colSpan="3" className="p-4 text-center text-slate-500">No contacts found.</td>
-                                </tr>
-                            ) : (
-                                contacts.map((contact) => (
-                                    <tr key={contact.id} className="border-t hover:bg-slate-100 transition">
-                                        <td className="p-3">
-                                            <input
-                                                type="checkbox"
-                                                checked={selectedContacts.includes(contact.id)}
-                                                onChange={() => toggleSelect(contact.id)}
+                {/* Contact List */}
+                <div className="mb-5">
+                    {isLoadingContacts ? (
+                        <p className="text-center py-6 text-slate-500">Loading contacts...</p>
+                    ) : contacts.length === 0 ? (
+                        <p className="text-center py-6 text-slate-500">No contacts found.</p>
+                    ) : (
+                        <div className="grid grid-cols-1 sm:block">
+                            {/* On large screen show table */}
+                            <table className="hidden sm:table min-w-full text-sm text-left text-slate-700 border rounded-lg shadow">
+                                <thead className="bg-slate-100">
+                                    <tr>
+                                        <th className="p-3">
+                                            <input 
+                                                type="checkbox" 
+                                                checked={isAllSelected} 
+                                                onChange={toggleSelectAll} 
                                             />
-                                        </td>
-                                        <td className="p-3">{contact.name}</td>
-                                        <td className="p-3">{contact.phone}</td>
+                                        </th>
+                                        <th className="p-3 font-semibold text-slate-700">Name</th>
+                                        <th className="p-3 font-semibold text-slate-700">Phone</th>
                                     </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
+                                </thead>
+                                <tbody>
+                                    {contacts.map((contact) => (
+                                        <tr key={contact.id} className="border-t hover:bg-slate-100 transition">
+                                            <td className="p-3">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedContacts.includes(contact.id)}
+                                                    onChange={() => toggleSelect(contact.id)}
+                                                />
+                                            </td>
+                                            <td className="p-3">{contact.name}</td>
+                                            <td className="p-3">{contact.phone}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+
+                            {/* On small screen show cards */}
+                            <div className="flex flex-col gap-3 sm:hidden">
+                                {contacts.map((contact) => (
+                                    <div key={contact.id} className="border rounded-xl p-3 flex items-center justify-between">
+                                        <div>
+                                            <p className="font-semibold text-slate-800">{contact.name}</p>
+                                            <p className="text-slate-600 text-sm">{contact.phone}</p>
+                                        </div>
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedContacts.includes(contact.id)}
+                                            onChange={() => toggleSelect(contact.id)}
+                                            className="w-5 h-5"
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-3">
@@ -276,7 +292,7 @@ function NotificationConfirmationModal({ contacts, selectedIds, onConfirm, onCan
     const selected = contacts.filter((c) => selectedIds.includes(c.id));
     return (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-xl shadow-xl max-w-md w-full">
+            <div className="bg-white p-6 rounded-xl shadow-xl max-w-md w-full mx-3">
                 <h2 className="text-lg font-semibold mb-4 text-slate-800">Confirm Notification</h2>
                 <p className="mb-3 text-slate-600">You are about to send notifications to:</p>
                 <ul className="max-h-40 overflow-y-auto text-sm mb-4 border rounded p-2 space-y-1">

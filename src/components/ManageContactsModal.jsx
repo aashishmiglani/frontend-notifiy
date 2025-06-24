@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import Loader from "./Loader"; // Adjust path if needed
+import Loader from "./Loader";
 
 export default function ManageContactsModal({ onClose }) {
     const [contacts, setContacts] = useState([]);
@@ -68,9 +68,9 @@ export default function ManageContactsModal({ onClose }) {
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white bg-opacity-95">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white bg-opacity-95 px-3 py-4">
             <ToastContainer position="top-center" autoClose={2000} />
-            <div className="bg-white p-6 rounded-2xl shadow-lg w-full max-w-lg relative">
+            <div className="bg-white p-5 sm:p-6 rounded-2xl shadow-xl w-full max-w-lg relative overflow-y-auto max-h-[90vh] border border-slate-200">
                 
                 {loading && (
                     <div className="absolute inset-0 bg-white bg-opacity-70 flex items-center justify-center z-20 rounded-2xl">
@@ -80,25 +80,26 @@ export default function ManageContactsModal({ onClose }) {
 
                 <button
                     onClick={onClose}
-                    className="absolute top-2 right-2 text-slate-500 hover:text-slate-800 text-xl"
+                    className="absolute top-2 right-2 text-slate-400 hover:text-slate-700 text-2xl font-bold"
                     disabled={loading}
                 >
                     &times;
                 </button>
 
-                <h2 className="text-xl font-bold mb-4 text-center text-slate-800">➕ Manage Contacts</h2>
+                <h2 className="text-2xl font-bold mb-5 text-center text-slate-800">Manage Contacts</h2>
 
-                <div className="mb-6">
+                {/* Add Contact */}
+                <div className="mb-6 space-y-2">
                     <input
                         type="text"
                         placeholder="Name"
                         value={newName}
                         onChange={(e) => setNewName(e.target.value)}
-                        className="w-full mb-2 px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-300 outline-none text-slate-800"
+                        className="w-full px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-300 outline-none text-slate-800"
                         disabled={loading}
                     />
 
-                    <div className="flex mb-2">
+                    <div className="flex">
                         <span className="flex items-center px-4 bg-slate-100 border border-slate-300 border-r-0 rounded-l-xl text-slate-600">
                             +91
                         </span>
@@ -118,16 +119,19 @@ export default function ManageContactsModal({ onClose }) {
 
                     <button
                         onClick={handleAdd}
-                        className="bg-teal-600 text-white px-4 py-2 rounded-xl hover:bg-teal-700 transition w-full"
+                        className="bg-teal-600 text-white px-4 py-2 rounded-xl hover:bg-teal-700 transition w-full font-semibold"
                         disabled={loading}
                     >
-                        💾 Add Contact
+                        Add Contact
                     </button>
                 </div>
 
-                <h3 className="text-md font-semibold mb-3 text-slate-700">📋 Existing Contacts</h3>
-                <div className="overflow-y-auto max-h-64 border rounded-xl mb-5">
-                    <table className="w-full text-sm text-left text-slate-700">
+                {/* Existing Contacts */}
+                <h3 className="text-lg font-semibold mb-3 text-slate-700">Existing Contacts</h3>
+
+                <div className="overflow-y-auto max-h-64 border rounded-xl mb-5 p-2 bg-slate-50">
+                    {/* Table on desktop */}
+                    <table className="w-full text-sm text-left text-slate-700 hidden sm:table">
                         <thead className="bg-slate-100">
                             <tr>
                                 <th className="p-3 font-semibold">Name</th>
@@ -137,13 +141,16 @@ export default function ManageContactsModal({ onClose }) {
                         </thead>
                         <tbody>
                             {contacts.map((contact) => (
-                                <tr key={contact.id} className="border-t hover:bg-slate-50 transition">
+                                <tr
+                                    key={contact.id}
+                                    className="border-t hover:bg-slate-100 transition"
+                                >
                                     <td className="p-3">{contact.name}</td>
                                     <td className="p-3">{contact.phone}</td>
                                     <td className="p-3 text-right">
                                         <button
                                             onClick={() => handleDelete(contact.id)}
-                                            className="text-red-500 hover:text-red-700 text-sm"
+                                            className="text-red-500 hover:text-red-700 text-sm font-medium"
                                             disabled={loading}
                                         >
                                             Delete
@@ -160,11 +167,36 @@ export default function ManageContactsModal({ onClose }) {
                             )}
                         </tbody>
                     </table>
+
+                    {/* Cards on mobile */}
+                    <div className="flex flex-col gap-3 sm:hidden">
+                        {contacts.map((contact) => (
+                            <div
+                                key={contact.id}
+                                className="bg-white border border-slate-200 rounded-xl p-3 shadow-sm flex items-center justify-between hover:shadow-md transition"
+                            >
+                                <div>
+                                    <p className="font-medium text-slate-800">{contact.name}</p>
+                                    <p className="text-slate-600 text-sm">{contact.phone}</p>
+                                </div>
+                                <button
+                                    onClick={() => handleDelete(contact.id)}
+                                    className="text-red-500 hover:text-red-700 text-sm font-medium"
+                                    disabled={loading}
+                                >
+                                    Delete
+                                </button>
+                            </div>
+                        ))}
+                        {contacts.length === 0 && (
+                            <p className="text-center text-slate-500 py-3">No contacts found.</p>
+                        )}
+                    </div>
                 </div>
 
                 <button
                     onClick={onClose}
-                    className="bg-emerald-600 text-white px-4 py-2 rounded-xl hover:bg-emerald-700 transition w-full"
+                    className="bg-emerald-600 text-white px-4 py-2 rounded-xl hover:bg-emerald-700 transition w-full font-semibold"
                     disabled={loading}
                 >
                     Done
