@@ -3,10 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import TimePicker from "react-time-picker";
-import "react-time-picker/dist/TimePicker.css";
-import "react-clock/dist/Clock.css";
-import "react-datepicker/dist/react-datepicker.css";
+import FormPopup from "../components/FormPopup"; // Adjust path if needed
 
 export default function SchedulePage() {
   const [eventName, setEventName] = useState("");
@@ -17,14 +14,11 @@ export default function SchedulePage() {
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [editingEventId, setEditingEventId] = useState(null);
-
   const navigate = useNavigate();
 
   useEffect(() => {
-    const delayDebounce = setTimeout(() => {
-      fetchEvents(searchTerm);
-    }, 300);
-    return () => clearTimeout(delayDebounce);
+    const timer = setTimeout(() => fetchEvents(searchTerm), 300);
+    return () => clearTimeout(timer);
   }, [searchTerm]);
 
   const fetchEvents = async (search = "") => {
@@ -35,7 +29,7 @@ export default function SchedulePage() {
         : "https://backend-notification.vercel.app/api/schedule";
       const res = await axios.get(url);
       setEvents(res.data.data || []);
-    } catch (error) {
+    } catch {
       toast.error("Failed to fetch events.");
     } finally {
       setLoading(false);
@@ -53,7 +47,7 @@ export default function SchedulePage() {
         });
         toast.success("Event updated!");
       } else {
-        await axios.post("https://backend-notification.vercel.app/api/schedule", {
+        await axios.post(`https://backend-notification.vercel.app/api/schedule`, {
           event_name: eventName,
           event_date: eventDate,
           event_time: eventTime,
@@ -62,7 +56,7 @@ export default function SchedulePage() {
       }
       await fetchEvents(searchTerm);
       resetForm();
-    } catch (error) {
+    } catch {
       toast.error("Failed to schedule/update event.");
     } finally {
       setLoading(false);
@@ -88,180 +82,119 @@ export default function SchedulePage() {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this event?")) return;
     setLoading(true);
-    const previousEvents = [...events];
-    setEvents(events.filter(event => event.id !== id));
+    const previous = [...events];
+    setEvents(events.filter((e) => e.id !== id));
     try {
       await axios.delete(`https://backend-notification.vercel.app/api/schedule/${id}`);
       toast.info("Event deleted.");
-    } catch (error) {
+    } catch {
+      setEvents(previous);
       toast.error("Failed to delete event.");
-      setEvents(previousEvents);
     } finally {
       setLoading(false);
     }
   };
 
+  const onEventClick = (event) => {
+    navigate("/contacts", {
+      state: {
+        eventId: event.id,
+        eventName: event.event_name,
+        eventDate: event.event_date,
+        eventTime: event.event_time,
+      },
+    });
+  };
+
+  const SearchInput = () => (
+    <div className="flex w-full items-center bg-[#ededed] rounded-xl h-14 mb-6 px-4">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" viewBox="0 0 256 256" fill="currentColor" className="text-gray-500 mr-3">
+        <path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"/>
+      </svg>
+      <input
+        type="text"
+        placeholder="Search notifications"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        className="flex w-full bg-[#ededed] text-[#141414] placeholder:text-gray-500 border-none focus:outline-none"
+      />
+    </div>
+  );
+
+  const renderDesktop = () => (
+    <div className="max-w-[960px] mx-auto px-4 py-6">
+      <div className="flex justify-between items-center mb-6">
+        <p className="text-[#0d141c] text-[32px] font-bold">Notifications</p>
+        <button
+          onClick={() => setShowForm(true)}
+          className="bg-black hover:bg-gray-900 text-white px-5 py-2 rounded-full font-medium"
+        >
+          ➕ New Event
+        </button>
+      </div>
+      <SearchInput />
+      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+        <table className="min-w-full text-sm text-left">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-5 py-3 text-[#0d141c] font-semibold">Event Name</th>
+              <th className="px-5 py-3 text-[#0d141c] font-semibold">Date</th>
+              <th className="px-5 py-3 text-[#0d141c] font-semibold">Time</th>
+              <th className="px-5 py-3 text-[#0d141c] font-semibold">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {events.length > 0 ? events.map((ev) => {
+              const date = new Date(ev.event_date).toLocaleDateString("en-GB", {
+                year: "numeric", month: "short", day: "numeric"
+              });
+              const time = new Date(`1970-01-01T${ev.event_time}`).toLocaleTimeString("en-US", {
+                hour: "2-digit", minute: "2-digit", hour12: true
+              });
+              return (
+                <tr key={ev.id} className="border-t hover:bg-slate-100 cursor-pointer" onClick={() => onEventClick(ev)}>
+                  <td className="px-5 py-3 text-[#0d141c]">{ev.event_name}</td>
+                  <td className="px-5 py-3 text-[#49739c]">{date}</td>
+                  <td className="px-5 py-3 text-[#49739c]">{time}</td>
+                  <td className="px-5 py-3 space-x-2">
+                    <button onClick={(e) => { e.stopPropagation(); handleEdit(ev); }} className="bg-gray-400 hover:bg-gray-500 text-white px-3 py-1 rounded-full text-xs">Edit</button>
+                    <button onClick={(e) => { e.stopPropagation(); handleDelete(ev.id); }} className="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded-full text-xs">Delete</button>
+                  </td>
+                </tr>
+              );
+            }) : (
+              <tr>
+                <td colSpan="4" className="p-6 text-gray-400 italic text-center">No events found.</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
   return (
-    <div className="min-h-screen bg-gray-50 py-6 px-4 sm:px-6 lg:px-8 text-gray-800 font-sans">
+    <div className="min-h-screen bg-slate-50 text-gray-800 font-sans">
       <ToastContainer position="top-right" autoClose={3000} theme="colored" />
-      
       {loading && (
-        <div className="fixed inset-0 bg-white/60 z-50 flex justify-center items-center">
+        <div className="fixed inset-0 bg-white/60 z-50 flex items-center justify-center">
           <div className="w-14 h-14 border-4 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
         </div>
       )}
-
-      <div className="max-w-6xl mx-auto bg-white shadow-md rounded-2xl p-4 sm:p-6 border border-gray-200">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-          <h1 className="text-2xl sm:text-3xl font-semibold text-gray-700">📅 Schedule Manager</h1>
-          <button
-            onClick={() => showForm ? resetForm() : setShowForm(true)}
-            className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm sm:text-base"
-          >
-            {showForm ? "Cancel" : "➕ New Event"}
-          </button>
-        </div>
-
-        {showForm && (
-          <div className="bg-gray-100 p-4 sm:p-6 rounded-xl mb-8 border border-gray-200 space-y-4">
-            <div>
-              <label className="block sm:hidden text-sm font-medium text-gray-600 mb-1">Event Name</label>
-              <input
-                type="text"
-                value={eventName}
-                onChange={(e) => setEventName(e.target.value)}
-                placeholder="Event Name"
-                className="w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-gray-300"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block sm:hidden text-sm font-medium text-gray-600 mb-1">Date</label>
-                <input
-                  type="date"
-                  value={eventDate}
-                  onChange={(e) => setEventDate(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-gray-300"
-                />
-              </div>
-              <div>
-                <label className="block sm:hidden text-sm font-medium text-gray-600 mb-1">Time</label>
-                <TimePicker
-                  onChange={setEventTime}
-                  value={eventTime}
-                  format="hh:mm a"
-                  disableClock={true}
-                  className="w-full !border !border-gray-300 !rounded-md"
-                />
-              </div>
-            </div>
-
-            <button
-              onClick={handleSchedule}
-              className="w-full bg-gray-700 hover:bg-gray-800 text-white py-3 rounded-md font-medium shadow-sm"
-            >
-              {editingEventId ? "✏️ Update Event" : "✅ Save Event"}
-            </button>
-          </div>
-        )}
-
-        <div className="relative mb-6">
-          <input
-            type="text"
-            placeholder="🔍 Search events..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-gray-300"
-          />
-          {searchTerm && (
-            <button
-              onClick={() => setSearchTerm("")}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-            >
-              ❌
-            </button>
-          )}
-        </div>
-
-        <div className="overflow-x-auto rounded-xl border border-gray-200 w-full">
-          <table className="min-w-full text-sm text-center whitespace-nowrap">
-            <thead className="bg-gray-100 text-gray-600 uppercase text-xs tracking-wide">
-              <tr>
-                <th className="p-3 border">#</th>
-                <th className="p-3 border">Event Name</th>
-                <th className="p-3 border">Date</th>
-                <th className="p-3 border">Day</th>
-                <th className="p-3 border">Time</th>
-                <th className="p-3 border">Action</th>
-              </tr>
-            </thead>
-            <tbody className="text-gray-700">
-              {events.length > 0 ? (
-                events.map((event, index) => (
-                  <tr key={event.id} className="hover:bg-gray-50 transition">
-                    <td className="p-3 border">{index + 1}</td>
-                    <td
-                      className="p-3 border text-blue-600 hover:underline cursor-pointer"
-                      onClick={() =>
-                        navigate("/contacts", {
-                          state: {
-                            eventId: event.id,
-                            eventName: event.event_name,
-                            eventDate: event.event_date,
-                            eventTime: event.event_time,
-                          },
-                        })
-                      }
-                    >
-                      {event.event_name}
-                    </td>
-                    <td className="p-3 border">
-                      {new Date(event.event_date).toLocaleDateString("en-GB", {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                      })}
-                    </td>
-                    <td className="p-3 border">
-                      {new Date(event.event_date).toLocaleDateString("en-US", {
-                        weekday: "short",
-                      })}
-                    </td>
-                    <td className="p-3 border">
-                      {new Date(`1970-01-01T${event.event_time}`).toLocaleTimeString("en-US", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        hour12: true,
-                      })}
-                    </td>
-                    <td className="p-3 border space-y-1 sm:space-x-2 sm:space-y-0 flex flex-col sm:flex-row justify-center items-center">
-                      <button
-                        onClick={() => handleEdit(event)}
-                        className="bg-gray-400 hover:bg-gray-500 text-white px-3 py-1 rounded-md text-xs"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(event.id)}
-                        className="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded-md text-xs"
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="6" className="p-6 text-gray-400 italic">
-                    No events found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      {showForm && (
+        <FormPopup
+          onClose={resetForm}
+          onSave={handleSchedule}
+          eventName={eventName}
+          setEventName={setEventName}
+          eventDate={eventDate}
+          setEventDate={setEventDate}
+          eventTime={eventTime}
+          setEventTime={setEventTime}
+          editingEventId={editingEventId}
+        />
+      )}
+      <div>{renderDesktop()}</div>
     </div>
   );
 }
