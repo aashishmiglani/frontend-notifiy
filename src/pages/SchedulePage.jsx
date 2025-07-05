@@ -4,6 +4,7 @@ import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import FormPopup from "../components/FormPopup"; // Adjust path if needed
+import BASE_URL from "../config/baseUrl"; // Adjust the path if needed
 
 export default function SchedulePage() {
   const [eventName, setEventName] = useState("");
@@ -25,8 +26,8 @@ export default function SchedulePage() {
     setLoading(true);
     try {
       const url = search
-        ? `https://backend-notification.vercel.app/api/schedule/search/${encodeURIComponent(search)}`
-        : "https://backend-notification.vercel.app/api/schedule";
+        ? `${BASE_URL}/schedule/search/${encodeURIComponent(search)}`
+        : `${BASE_URL}/schedule`;
       const res = await axios.get(url);
       setEvents(res.data.data || []);
     } catch {
@@ -40,14 +41,14 @@ export default function SchedulePage() {
     setLoading(true);
     try {
       if (editingEventId) {
-        await axios.put(`https://backend-notification.vercel.app/api/schedule/${editingEventId}`, {
+        await axios.put(`${BASE_URL}/schedule/${editingEventId}`, {
           event_name: eventName,
           event_date: eventDate,
           event_time: eventTime,
         });
         toast.success("Event updated!");
       } else {
-        await axios.post(`https://backend-notification.vercel.app/api/schedule`, {
+        await axios.post(`${BASE_URL}/schedule`, {
           event_name: eventName,
           event_date: eventDate,
           event_time: eventTime,
@@ -85,7 +86,7 @@ export default function SchedulePage() {
     const previous = [...events];
     setEvents(events.filter((e) => e.id !== id));
     try {
-      await axios.delete(`https://backend-notification.vercel.app/api/schedule/${id}`);
+      await axios.delete(`${BASE_URL}/schedule/${id}`);
       toast.info("Event deleted.");
     } catch {
       setEvents(previous);

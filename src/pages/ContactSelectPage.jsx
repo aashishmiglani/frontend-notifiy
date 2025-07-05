@@ -4,6 +4,8 @@ import axios from "axios";
 import ManageContactsModal from "../components/ManageContactsModal";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import BASE_URL from "../config/baseUrl"; // Adjust the path if needed
+
 
 export default function ContactSelectPage() {
     const { state } = useLocation();
@@ -42,12 +44,12 @@ export default function ContactSelectPage() {
     const fetchContacts = async () => {
         try {
             setIsLoadingContacts(true);
-            const contactRes = await axios.get(`https://backend-notification.vercel.app/api/contacts`, {
+            const contactRes = await axios.get(`${BASE_URL}/contacts`, {
                 params: { search: searchQuery },
             });
             const allContacts = contactRes.data.data;
 
-            const notifRes = await axios.get(`https://backend-notification.vercel.app/api/notifications`, {
+            const notifRes = await axios.get(`${BASE_URL}/notifications`, {
                 params: { event_id: state.eventId },
             });
             const existingNotifs = notifRes.data.data;
@@ -86,7 +88,7 @@ export default function ContactSelectPage() {
         try {
             setIsSending(true);
 
-            const notifRes = await axios.get(`https://backend-notification.vercel.app/api/notifications`, {
+            const notifRes = await axios.get(`${BASE_URL}/notifications`, {
                 params: { event_id: state.eventId },
             });
             const existingNotifications = notifRes.data.data;
@@ -99,9 +101,9 @@ export default function ContactSelectPage() {
             }));
 
             if (toAdd.length === 1) {
-                await axios.post(`https://backend-notification.vercel.app/api/notifications`, toAdd[0]);
+                await axios.post(`${BASE_URL}/notifications`, toAdd[0]);
             } else if (toAdd.length > 1) {
-                await axios.post(`https://backend-notification.vercel.app/api/notifications/bulk`, toAdd);
+                await axios.post(`${BASE_URL}/notifications/bulk`, toAdd);
             }
 
             const toDelete = existingNotifications.filter(
@@ -109,7 +111,7 @@ export default function ContactSelectPage() {
             );
 
             for (const record of toDelete) {
-                await axios.delete(`https://backend-notification.vercel.app/api/notifications/notifications/${record.id}`);
+                await axios.delete(`${BASE_URL}/notifications/notifications/${record.id}`);
             }
 
             toast.success("✅ Selection saved successfully!");
@@ -126,7 +128,7 @@ export default function ContactSelectPage() {
     const handleSend = async () => {
         try {
             setIsSending(true);
-            await axios.post(`https://backend-notification.vercel.app/api/send-message`, {
+            await axios.post(`${BASE_URL}/send-message`, {
                 event_id: state.eventId,
                 contact_ids: selectedContacts,
             });
@@ -142,7 +144,7 @@ export default function ContactSelectPage() {
 
     const handleSendClick = async () => {
         try {
-            const notifRes = await axios.get(`https://backend-notification.vercel.app/api/notifications`, {
+            const notifRes = await axios.get(`${BASE_URL}/notifications`, {
                 params: { event_id: state.eventId },
             });
             const savedSelected = notifRes.data.data

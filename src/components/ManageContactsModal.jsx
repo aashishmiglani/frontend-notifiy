@@ -3,6 +3,7 @@ import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Loader from "./Loader";
+import BASE_URL from "../config/baseUrl";
 
 export default function ManageContactsModal({ onClose }) {
     const [contacts, setContacts] = useState([]);
@@ -17,7 +18,7 @@ export default function ManageContactsModal({ onClose }) {
     const fetchContacts = async () => {
         setLoading(true);
         try {
-            const res = await axios.get("https://backend-notification.vercel.app/api/contacts");
+            const res = await axios.get(`${BASE_URL}/contacts`);
             setContacts(res.data.data);
         } catch (err) {
             console.error("Error fetching contacts:", err.message);
@@ -37,7 +38,7 @@ export default function ManageContactsModal({ onClose }) {
 
         setLoading(true);
         try {
-            await axios.post("https://backend-notification.vercel.app/api/contacts", {
+            await axios.post(`${BASE_URL}/contacts`, {
                 name: newName,
                 phone: formattedPhone,
             });
@@ -56,7 +57,7 @@ export default function ManageContactsModal({ onClose }) {
     const handleDelete = async (id) => {
         setLoading(true);
         try {
-            await axios.delete(`https://backend-notification.vercel.app/api/contacts/${id}`);
+            await axios.delete(`${BASE_URL}/contacts/${id}`);
             toast.success("🗑️ Contact deleted.");
             await fetchContacts();
         } catch (err) {
