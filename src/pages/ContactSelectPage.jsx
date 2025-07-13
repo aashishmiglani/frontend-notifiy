@@ -133,7 +133,7 @@ export default function ContactSelectPage() {
                 contact_ids: selectedContacts,
             });
             toast.success("✅ Notifications sent successfully!");
-            setTimeout(() => navigate("/"), 2000);
+            setTimeout(() => navigate("/schedule"), 2000);
         } catch (err) {
             console.error("Error sending notifications:", err.message);
             toast.error("❌ Something went wrong while sending messages.");
@@ -164,7 +164,7 @@ export default function ContactSelectPage() {
         <div className="min-h-screen bg-slate-50 py-6 px-3 sm:px-6 flex justify-center">
             <div className="bg-white w-full max-w-4xl p-5 sm:p-6 rounded-2xl shadow-lg">
                 <button 
-                    onClick={() => navigate("/")} 
+                    onClick={() => navigate("/schedule")} 
                     className="text-teal-600 hover:text-teal-800 mb-4 flex items-center space-x-1 text-base font-medium"
                 >
                     <span className="text-xl">←</span>

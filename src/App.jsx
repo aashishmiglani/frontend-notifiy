@@ -1,38 +1,22 @@
-import { useState } from "react";
-import "react-datepicker/dist/react-datepicker.css";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import SchedulePage from "./pages/SchedulePage.jsx";
+import ContactSelectPage from "./pages/ContactSelectPage.jsx";
+import LoginPage from "./pages/LoginPage.jsx";
+import PrivateRoute from "./routes/PrivateRoute.jsx";
+
 export default function App() {
-  // const [name, setName] = useState("");
-  // const [eventName, setEventName] = useState("");
-  // const [eventDate, setEventDate] = useState("");
-  // const [eventTime, setEventTime] = useState("");
-  // const [phoneNumber, setPhoneNumber] = useState("");
-
-  // const handleSchedule = async () => {
-  //   if (!eventDate || !eventTime) {
-  //     alert("Please fill both date and time");
-  //     return;
-  //   }
-
-  //   const combinedDateTime = new Date(`${eventDate}T${eventTime}`);
-  //   const isoString = combinedDateTime.toISOString();
-
-  //   // Send to backend
-  //   await fetch("https://backend-notification.vercel.app/api/schedule", {
-  //     method: "POST",
-  //     headers: { "Content-Type": "application/json" },
-  //     body: JSON.stringify({
-  //       name,
-  //       eventName,
-  //       eventTime: isoString,
-  //       phoneNumber,
-  //     }),
-  //   });
-
-  //   alert(`Event scheduled for ${name}`);
-  // };
-
   return (
-    <>
-    </>
+    <BrowserRouter>
+      <Routes>
+        {/* Public Route */}
+        <Route path="/" element={<LoginPage />} />
+
+        {/* Protected Routes nested under PrivateRoute */}
+        <Route element={<PrivateRoute />}>
+          <Route path="/schedule" element={<SchedulePage />} />
+          <Route path="/contacts" element={<ContactSelectPage />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   );
 }
